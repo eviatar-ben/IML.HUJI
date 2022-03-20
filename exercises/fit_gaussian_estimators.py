@@ -1,15 +1,11 @@
+import plotly
+import plotly.express as px
 from IMLearn.learners import UnivariateGaussian, MultivariateGaussian
 import numpy as np
 import plotly.graph_objects as go
 import plotly.io as pio
 
 pio.templates.default = "simple_white"
-
-# todo check that:
-import sys
-
-sys.path.append(r'\C:\Users\eviatar\Desktop\eviatar\Study\YearD\semester b\I.M.L\repo\IML.HUJI')
-from IMLearn.learners import UnivariateGaussian, MultivariateGaussian
 
 
 def test_univariate_gaussian():
@@ -21,10 +17,9 @@ def test_univariate_gaussian():
     print((uni_gau.mu_, uni_gau.var_))
 
     # Question 2 - Empirically showing sample mean is consistent
-    # raise NotImplementedError()
 
     # todo maybe range (10, 1010, 10)
-    ms = np.linspace(10, 1000, num=100).astype(np.int)
+    ms = np.linspace(10, 1000, num=100).astype(int)
     estimated_diff = []
     for m in ms:
         m_samples = np.random.normal(10, 1, size=m)
@@ -36,11 +31,13 @@ def test_univariate_gaussian():
                                      r" and true value of the expectation As Function Of Number Of Samples}$",
                                xaxis_title=r"$m\text{ - number of samples}$",
                                yaxis_title=r"$|\hat\mu - \mu|$",
-                               # yaxis_title=r"r$\hat\mu$ ",
                                height=600)).show()
 
     # Question 3 - Plotting Empirical PDF of fitted model
-    # raise NotImplementedError()
+    px.scatter(x=samples, y=uni_gau.pdf(samples),
+               title="Empirical PDF",
+               labels=dict(x="sample values", y="pdf")).show()
+    # As expected we've got a gaussian distribution centered in the mean = 10 and with relatively low variance = 1
 
 
 def test_multivariate_gaussian():

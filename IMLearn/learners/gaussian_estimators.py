@@ -52,9 +52,7 @@ class UnivariateGaussian:
         Sets `self.mu_`, `self.var_` attributes according to calculated estimation (where
         estimator is either biased or unbiased). Then sets `self.fitted_` attribute to `True`
         """
-        # raise NotImplementedError() todo// check ?
 
-        # todo check weather the estimators formula right.. - is that what they meant to?
         self.mu_ = np.mean(X)
         if not self.biased_:
             self.var_ = np.var(X, ddof=1)
@@ -95,6 +93,7 @@ class UnivariateGaussian:
         b = np.sqrt(2 * np.pi * self.var_)
         pds_result = np.exp(a) / b
         return pds_result
+
 
     @staticmethod
     def log_likelihood(mu: float, sigma: float, X: np.ndarray) -> float:
