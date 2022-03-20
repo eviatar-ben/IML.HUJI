@@ -55,11 +55,18 @@ class UnivariateGaussian:
         # raise NotImplementedError() todo// check ?
 
         # todo check weather the estimators formula right.. - is that what they meant to?
-        self.mu_ = np.sum(X) / X.shape
+        self.mu_ = np.mean(X)
         if not self.biased_:
-            self.var_ = np.sum(np.power(X - self.mu_, 2)) / (X.shape[0]) - 1
+            self.var_ = np.var(X, ddof=1)
         else:
-            self.var_ = np.sum(np.power(X - self.mu_, 2)) / (X.shape[0])
+            self.var_ = np.var(X, ddof=0)  # "ddof" equal 1 or 0 depend by the biased character.
+
+        # self.mu_ = np.sum(X) / (X.shape[0])
+        # if not self.biased_:
+        #     self.var_ = np.sum(np.power(X - self.mu_, 2)) / (X.shape[0]) - 1
+        # else:
+        #     self.var_ = np.sum(np.power(X - self.mu_, 2)) / (X.shape[0])
+
         self.fitted_ = True
         return self
 
