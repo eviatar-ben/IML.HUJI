@@ -7,6 +7,7 @@ class UnivariateGaussian:
     """
     Class for univariate Gaussian Distribution Estimator
     """
+
     def __init__(self, biased_var: bool = False) -> UnivariateGaussian:
         """
         Estimator for univariate Gaussian mean and variance parameters
@@ -51,8 +52,14 @@ class UnivariateGaussian:
         Sets `self.mu_`, `self.var_` attributes according to calculated estimation (where
         estimator is either biased or unbiased). Then sets `self.fitted_` attribute to `True`
         """
-        raise NotImplementedError()
+        # raise NotImplementedError() todo// check ?
 
+        # todo check weather the estimators formula right.. - is that what they meant to?
+        self.mu_ = np.sum(X) / X.shape
+        if not self.biased_:
+            self.var_ = np.sum(np.power(X - self.mu_, 2)) / (X.shape[0]) - 1
+        else:
+            self.var_ = np.sum(np.power(X - self.mu_, 2)) / (X.shape[0])
         self.fitted_ = True
         return self
 
@@ -76,7 +83,11 @@ class UnivariateGaussian:
         """
         if not self.fitted_:
             raise ValueError("Estimator must first be fitted before calling `pdf` function")
-        raise NotImplementedError()
+        # raise NotImplementedError()
+        a = np.power((X - self.mu_), 2) / (- 2 * self.var_)
+        b = np.sqrt(2 * np.pi * self.var_)
+        pds_result = np.exp(a) / b
+        return pds_result
 
     @staticmethod
     def log_likelihood(mu: float, sigma: float, X: np.ndarray) -> float:
@@ -97,13 +108,18 @@ class UnivariateGaussian:
         log_likelihood: float
             log-likelihood calculated
         """
-        raise NotImplementedError()
+        # raise NotImplementedError()
+        a = np.sum(np.power(X - mu, 2)) / (-2 * sigma)
+        b = np.power(2 * np.pi * sigma, (X.shape[0] / 2))
+
+        return np.exp(a) / b
 
 
 class MultivariateGaussian:
     """
     Class for multivariate Gaussian Distribution Estimator
     """
+
     def __init__(self):
         """
         Initialize an instance of multivariate Gaussian estimator
