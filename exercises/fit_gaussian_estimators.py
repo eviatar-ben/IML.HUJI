@@ -9,8 +9,8 @@ pio.templates.default = "simple_white"
 
 
 def test_univariate_gaussian():
+    # ------------------------------------------------
     # Question 1 - Draw samples and print fitted model
-    # raise NotImplementedError()
     samples = np.random.normal(10, 1, size=1000)
     uni_gau = UnivariateGaussian().fit(samples)
     # todo check if this print is ok
@@ -38,6 +38,13 @@ def test_univariate_gaussian():
                title="Empirical PDF",
                labels=dict(x="sample values", y="pdf")).show()
     # As expected we've got a gaussian distribution centered in the mean = 10 and with relatively low variance = 1
+
+    # Ex1 Quiz:
+    # a = np.array([1, 5, 2, 3, 8, -4, -2, 5, 1, 10, -10, 4, 5, 2, 7, 1, 1, 3, 2, -1, -3, 1, -4, 1, 2, 1,
+    #               -4, -4, 1, 3, 2, 6, -6, 8, 3, -6, 4, 1, -2, 3, 1, 4, 1, 4, -2, 3, -1, 0, 3, 5, 0, -2])
+    #
+    # b = UnivariateGaussian.log_likelihood(1, 1, a)
+    # c = UnivariateGaussian.log_likelihood(10, 1, a)
 
 
 def test_multivariate_gaussian():

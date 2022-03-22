@@ -88,12 +88,10 @@ class UnivariateGaussian:
         """
         if not self.fitted_:
             raise ValueError("Estimator must first be fitted before calling `pdf` function")
-        # raise NotImplementedError()
         a = np.power((X - self.mu_), 2) / (- 2 * self.var_)
         b = np.sqrt(2 * np.pi * self.var_)
         pds_result = np.exp(a) / b
         return pds_result
-
 
     @staticmethod
     def log_likelihood(mu: float, sigma: float, X: np.ndarray) -> float:
@@ -115,10 +113,13 @@ class UnivariateGaussian:
             log-likelihood calculated
         """
         # raise NotImplementedError()
-        a = np.sum(np.power(X - mu, 2)) / (-2 * sigma)
-        b = np.power(2 * np.pi * sigma, (X.shape[0] / 2))
+        # before apply log:
+        # a = np.sum(np.power(X - mu, 2)) / (-2 * sigma)
+        # b = np.power(2 * np.pi * sigma, (X.shape[0] / 2))
 
-        return np.exp(a) / b
+        return -(X.shape[0] / 2) * np.log(2 * np.pi * sigma) + np.sum(np.power(X - mu, 2)) / (-2 * sigma)
+        # Another efficient possible:
+        # return -X.shape[0] * np.log(sigma) - np.sum(np.power(X - mu, 2)) / sigma
 
 
 class MultivariateGaussian:
