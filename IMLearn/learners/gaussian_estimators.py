@@ -118,7 +118,7 @@ class UnivariateGaussian:
         # b = np.power(2 * np.pi * sigma, (X.shape[0] / 2))
 
         return -(X.shape[0] / 2) * np.log(2 * np.pi * sigma) + np.sum(np.power(X - mu, 2)) / (-2 * sigma)
-        # Another efficient possible:
+        # Another efficient possibilityy:
         # return -X.shape[0] * np.log(sigma) - np.sum(np.power(X - mu, 2)) / sigma
 
 
@@ -167,7 +167,8 @@ class MultivariateGaussian:
         Then sets `self.fitted_` attribute to `True`
         """
         self.mu_ = np.mean(X, axis=0)
-        self.cov_ = np.dot((np.transpose(X - self.mu_)), (X - self.mu_)) / (X.shape[1] - 1)
+        self.cov_ = np.dot((np.transpose(X - self.mu_)), (X - self.mu_)) / (X.shape[0] - 1)
+        self.fitted_ = True
         return self
 
     def pdf(self, X: np.ndarray):
@@ -215,7 +216,6 @@ class MultivariateGaussian:
         """
         a = (X.shape[0] / -2) * np.log((2 * np.pi) ** X.shape[1])
         b = (X.shape[0] / -2) * np.log(np.linalg.det(cov))
-        c = np.dot(np.dot(np.transpose(X - mu), np.linalg.inv(cov)), (X - mu)) / -2
+        c = np.sum((X - mu) @ np.linalg.inv(cov) * ([X - mu])) / -2
 
         return a + b + c
-#

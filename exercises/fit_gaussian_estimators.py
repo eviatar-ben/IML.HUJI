@@ -49,13 +49,13 @@ def test_univariate_gaussian():
 
 def test_multivariate_gaussian():
     # Question 4 - Draw samples and print fitted model
-    mu = [0, 0, 4, 0]
-    covariance = [[1, 0.2, 0, 0.5],
-                  [0.2, 2, 0, 0],
-                  [0, 0, 1, 0],
-                  [0.5, 0, 0, 1]]
+    mu = np.array([0, 0, 4, 0])
+    covariance = np.array([[1, 0.2, 0, 0.5],
+                           [0.2, 2, 0, 0],
+                           [0, 0, 1, 0],
+                           [0.5, 0, 0, 1]])
 
-    X = np.random.multivariate_normal(mu, covariance, 1000)
+    X = np.random.multivariate_normal(mu, covariance, size=1000)
 
     mul_gau = MultivariateGaussian()
     mul_gau.fit(X)
@@ -64,6 +64,14 @@ def test_multivariate_gaussian():
 
     # Question 5 - Likelihood evaluation
     # raise NotImplementedError()
+    ms = np.linspace(-10, 10, 200)
+    log_likelihood_mat = np.array(
+        [[MultivariateGaussian.log_likelihood(np.transpose(np.array([i, 0, j, 0])), covariance, X)
+          for j in ms] for i in ms])
+    go.Figure(go.Heatmap(x=ms, y=ms, z=log_likelihood_mat),
+              layout=go.Layout(title="Multivariate Gaussian's log-likelihood, as function of features 1, 3",
+                               xaxis_title=r"feature3",
+                               yaxis_title=r"feature1")).show()
 
     # Question 6 - Maximum likelihood
     # raise NotImplementedError()
