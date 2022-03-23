@@ -18,7 +18,7 @@ def test_univariate_gaussian():
 
     # Question 2 - Empirically showing sample mean is consistent
 
-    # todo maybe range (10, 1010, 10)
+    # todo maybe range (10, 1010, 10)- more efficient
     ms = np.linspace(10, 1000, num=100).astype(int)
     estimated_diff = []
     for m in ms:
@@ -68,13 +68,17 @@ def test_multivariate_gaussian():
     log_likelihood_mat = np.array(
         [[MultivariateGaussian.log_likelihood(np.transpose(np.array([i, 0, j, 0])), covariance, X)
           for j in ms] for i in ms])
-    go.Figure(go.Heatmap(x=ms, y=ms, z=log_likelihood_mat),
-              layout=go.Layout(title="Multivariate Gaussian's log-likelihood, as function of features 1, 3",
+    heat_map_fig = go.Figure(go.Heatmap(x=ms, y=ms, z=log_likelihood_mat))
+    heat_map_fig.update_layout(title="Multivariate Gaussian's log-likelihood, as function of features 1, 3",
                                xaxis_title=r"feature3",
-                               yaxis_title=r"feature1")).show()
+                               yaxis_title=r"feature1")
+    heat_map_fig.show()
+
+    # Aa expected as  f1-> 0 and f3->4  we are getting higher likelihood
 
     # Question 6 - Maximum likelihood
-    # raise NotImplementedError()
+    i, j = np.unravel_index(np.argmax(log_likelihood_mat), log_likelihood_mat.shape)
+    print(ms[[i, j]])
 
 
 if __name__ == '__main__':
