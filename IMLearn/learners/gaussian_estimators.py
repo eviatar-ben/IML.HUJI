@@ -167,7 +167,8 @@ class MultivariateGaussian:
         Then sets `self.fitted_` attribute to `True`
         """
         self.mu_ = np.mean(X, axis=0)
-        self.cov_ = np.dot((np.transpose(X - self.mu_)), (X - self.mu_)) / (X.shape[0] - 1)
+        centered_x = X - self.mu_
+        self.cov_ = np.dot(centered_x.T, centered_x) / (X.shape[0] - 1)
         self.fitted_ = True
         return self
 
