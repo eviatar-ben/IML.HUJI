@@ -26,17 +26,17 @@ def test_univariate_gaussian():
         m_uni_gau = UnivariateGaussian().fit(m_samples)
         estimated_diff.append(np.abs(10 - m_uni_gau.mu_))
 
-    go.Figure([go.Scatter(x=ms, y=estimated_diff, mode='markers+lines', name=r'$\widehat\mu$')],
-              layout=go.Layout(title=r"$\text{The absolute distance between the estimated-"
-                                     r" and true value of the expectation As Function Of Number Of Samples}$",
-                               xaxis_title=r"$m\text{ - number of samples}$",
-                               yaxis_title=r"$|\hat\mu - \mu|$",
-                               height=600)).show()
+    # go.Figure([go.Scatter(x=ms, y=estimated_diff, mode='markers+lines', name=r'$\widehat\mu$')],
+    #           layout=go.Layout(title=r"$\text{The absolute distance between the estimated-"
+    #                                  r" and true value of the expectation As Function Of Number Of Samples}$",
+    #                            xaxis_title=r"$m\text{ - number of samples}$",
+    #                            yaxis_title=r"$|\hat\mu - \mu|$",
+    #                            height=600)).show()
 
     # Question 3 - Plotting Empirical PDF of fitted model
-    px.scatter(x=samples, y=uni_gau.pdf(samples),
-               title="Empirical PDF",
-               labels=dict(x="sample values", y="pdf")).show()
+    # px.scatter(x=samples, y=uni_gau.pdf(samples),
+    #            title="Empirical PDF",
+    #            labels=dict(x="sample values", y="pdf")).show()
     # As expected we've got a gaussian distribution centered in the mean = 10 and with relatively low variance = 1
 
     # Ex1 Quiz:
@@ -68,11 +68,11 @@ def test_multivariate_gaussian():
     log_likelihood_mat = np.array(
         [[MultivariateGaussian.log_likelihood(np.transpose(np.array([i, 0, j, 0])), covariance, X)
           for j in ms] for i in ms])
-    heat_map_fig = go.Figure(go.Heatmap(x=ms, y=ms, z=log_likelihood_mat))
-    heat_map_fig.update_layout(title="Multivariate Gaussian's log-likelihood, as function of features 1, 3",
-                               xaxis_title=r"feature3",
-                               yaxis_title=r"feature1")
-    heat_map_fig.show()
+    # heat_map_fig = go.Figure(go.Heatmap(x=ms, y=ms, z=log_likelihood_mat))
+    # heat_map_fig.update_layout(title="Multivariate Gaussian's log-likelihood, as function of features 1, 3",
+    #                            xaxis_title=r"feature3",
+    #                            yaxis_title=r"feature1")
+    # heat_map_fig.show()
 
     # Aa expected as  f1-> 0 and f3->4  we are getting higher likelihood
 
