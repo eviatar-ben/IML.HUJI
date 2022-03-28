@@ -7,6 +7,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 import plotly.io as pio
+
 pio.templates.default = "simple_white"
 
 
@@ -23,7 +24,33 @@ def load_data(filename: str):
     Design matrix and response vector (prices) - either as a single
     DataFrame or a Tuple[DataFrame, Series]
     """
-    raise NotImplementedError()
+    # -creating data frame:
+    data = pd.read_csv(filename)
+    # -omits id column as its a clear redundant noise:
+    data = data.drop(['id'], axis=1)
+    data.head()
+    # -dealing with nulls:
+    # since  data.isnull().sum() is very low we will drop them
+    data = data.dropna()
+    # print(data.isnull().sum())
+    # dealing with date:
+    data = data.drop([ 'date'], axis=1)
+    data.head()
+
+
+    # data['date'] = pd.to_datetime(data['date'])
+    # data['date_yr'] = data['date'].dt.year
+    # data['date_month'] = data['date'].dt.month
+    # data['age'] = data['date_yr'] - data['yr_built']
+    # data = data.drop(['date'], axis=1)
+    # data.head()
+    # dealing with categorical columns:
+
+    # dealing with feature that has a significant low correlation after plotting the heatmap.
+
+    # features deduction
+
+    # treating invalid/ missing values
 
 
 def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") -> NoReturn:
@@ -49,13 +76,13 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
 if __name__ == '__main__':
     np.random.seed(0)
     # Question 1 - Load and preprocessing of housing prices dataset
-    raise NotImplementedError()
+    load_data(r"C:\Users\eviatar\Desktop\eviatar\Study\YearD\semester b\I.M.L\repo\IML.HUJI\datasets\house_prices.csv")
 
     # Question 2 - Feature evaluation with respect to response
-    raise NotImplementedError()
+    # raise NotImplementedError()
 
     # Question 3 - Split samples into training- and testing sets.
-    raise NotImplementedError()
+    # raise NotImplementedError()
 
     # Question 4 - Fit model over increasing percentages of the overall training data
     # For every percentage p in 10%, 11%, ..., 100%, repeat the following 10 times:
@@ -64,4 +91,4 @@ if __name__ == '__main__':
     #   3) Test fitted model over test set
     #   4) Store average and variance of loss over test set
     # Then plot average loss as function of training size with error ribbon of size (mean-2*std, mean+2*std)
-    raise NotImplementedError()
+    # raise NotImplementedError()

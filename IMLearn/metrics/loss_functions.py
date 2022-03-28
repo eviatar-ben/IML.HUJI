@@ -18,7 +18,7 @@ def mean_square_error(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """
     # raise NotImplementedError()
     # todo:l check weather len(y) == shape[0
-    return (y_true - y_pred) / y_true.shape[0]
+    return np.sum((y_true - y_pred)**2)/ y_true.shape[0]
 
 
 def misclassification_error(y_true: np.ndarray, y_pred: np.ndarray, normalize: bool = True) -> float:
@@ -39,8 +39,10 @@ def misclassification_error(y_true: np.ndarray, y_pred: np.ndarray, normalize: b
     Misclassification of given predictions
     """
     raise NotImplementedError()
-
-    # return np.arange(len(y_true))[y_true==y_pred]
+    # factor = y_true.shape[0]
+    # if not normalize:
+    #     factor = 1
+    # return np.count_nonzero(y_pred == y_true) / factor
 
 
 def accuracy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
@@ -58,6 +60,7 @@ def accuracy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     -------
     Accuracy of given predictions
     """
+    # The Accuracy is the number of correct classification out of all predictions: (T P+T N)/(P+N)
     raise NotImplementedError()
 
 
