@@ -48,8 +48,6 @@ def load_data(filename: str):
     data['grade'] = data['grade'].astype('category')
     data['zipcode'] = data['zipcode'].astype(str)
     data = data.sort_values('date')
-    print(data.head(2))
-    print(data.dtypes)
     # dealing with feature that has a significant low correlation after plotting the heatmap.
 
     # features deduction
