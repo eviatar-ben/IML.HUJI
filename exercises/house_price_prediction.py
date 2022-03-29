@@ -28,24 +28,28 @@ def load_data(filename: str):
     data = pd.read_csv(filename)
     # -omits id column as its a clear redundant noise:
     data = data.drop(['id'], axis=1)
-    data.head()
     # -dealing with nulls:
-    # since  data.isnull().sum() is very low we will drop them
+    #       since  data.isnull().sum() is very low we will drop them
     data = data.dropna()
-    # print(data.isnull().sum())
+    #       print(data.isnull().sum())
     # dealing with date:
-    data = data.drop([ 'date'], axis=1)
-    data.head()
-
-
-    # data['date'] = pd.to_datetime(data['date'])
-    # data['date_yr'] = data['date'].dt.year
-    # data['date_month'] = data['date'].dt.month
-    # data['age'] = data['date_yr'] - data['yr_built']
-    # data = data.drop(['date'], axis=1)
-    # data.head()
+    # data = data.drop([ 'date'], axis=1)
+    #       data['date'] = pd.to_datetime(data['date'])
+    #       data['date'] = pd.to_datetime(data['date'])
+    #        data['date_yr'] = data['date'].dt.year
+    #       data['date_month'] = data['date'].dt.month
+    #       data['age'] = data['date_yr'] - data['yr_built']
+    #       data = data.drop(['date'], axis=1)
+    #       data.head()
     # dealing with categorical columns:
-
+    data['waterfront'] = data['waterfront'].astype('category')
+    data['view'] = data['view'].astype('category')
+    data['condition'] = data['condition'].astype('category')
+    data['grade'] = data['grade'].astype('category')
+    data['zipcode'] = data['zipcode'].astype(str)
+    data = data.sort_values('date')
+    print(data.head(2))
+    print(data.dtypes)
     # dealing with feature that has a significant low correlation after plotting the heatmap.
 
     # features deduction
