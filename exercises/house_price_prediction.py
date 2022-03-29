@@ -28,28 +28,22 @@ def load_data(filename: str):
     data = pd.read_csv(filename)
     # -omits id column as its a clear redundant noise:
     data = data.drop(['id'], axis=1)
-    # -dealing with nulls:
-    #       since  data.isnull().sum() is very low we will drop them
+    # -dealing with nulls (since  data.isnull().sum() is very low we will drop them):
     data = data.dropna()
-    #       print(data.isnull().sum())
-    # dealing with date:
-    # data = data.drop([ 'date'], axis=1)
-    #       data['date'] = pd.to_datetime(data['date'])
-    #       data['date'] = pd.to_datetime(data['date'])
-    #        data['date_yr'] = data['date'].dt.year
-    #       data['date_month'] = data['date'].dt.month
-    #       data['age'] = data['date_yr'] - data['yr_built']
-    #       data = data.drop(['date'], axis=1)
-    #       data.head()
-    # dealing with categorical columns:
-    data['waterfront'] = data['waterfront'].astype('category')
-    data['view'] = data['view'].astype('category')
-    data['condition'] = data['condition'].astype('category')
-    data['grade'] = data['grade'].astype('category')
-    data['zipcode'] = data['zipcode'].astype(str)
-    data = data.sort_values('date')
-    print(data.head(2))
-    print(data.dtypes)
+
+    # dealing with samples that has negative prices or houses that are too small
+    data = data[(data["sqft_living"] > 15)]
+    data = data[(data["price"] > 0)]
+
+    # replace the date with One Hot representation of month and year:
+    data['date'] = pd.to_datetime(data['date'])
+    # todo: switch day and month position
+    data['date'] = data['date'].dt.year.astype(str) + data['date'].dt.month.astype(str)
+    data = pd.get_dummies(data=data, columns=['date'])
+    # dealing Zip code by replacing it with One Hot representation:
+    # houses_df = pd.get_dummies(data=data, columns=['zipcode'])
+    print(data.head)
+
     # dealing with feature that has a significant low correlation after plotting the heatmap.
 
     # features deduction
