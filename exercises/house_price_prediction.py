@@ -42,13 +42,17 @@ def load_data(filename: str):
     data = pd.get_dummies(data=data, columns=['date'])
     # dealing Zip code by replacing it with One Hot representation:
     # houses_df = pd.get_dummies(data=data, columns=['zipcode'])
-    print(data.head)
 
     # dealing with feature that has a significant low correlation after plotting the heatmap.
 
     # features deduction
 
     # treating invalid/ missing values
+
+    y = data['price']
+    data.drop(['price'], axis=1, inplace=True)
+
+    return data, y
 
 
 def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") -> NoReturn:
@@ -68,15 +72,28 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
     output_path: str (default ".")
         Path to folder in which plots are saved
     """
-    raise NotImplementedError()
+    # corr = X.corr()
+    # corr.style.background_gradient(cmap='coolwarm').set_precision(2)
+    for i, column in enumerate(X.columns):
+
+        cov = pd.Series.cov(X.iloc[:, i], y)
+        std = pd.Series.std(X.iloc[:, i]) * pd.Series.std(y)
+        correlation = cov / std
+        # print(correlation)
+        if i == 3:
+            px.scatter(x=X.iloc[:, i], y=y,
+                       title="Empirical PDF",
+                       labels=dict(x=column + " values", y="price")).show()
 
 
 if __name__ == '__main__':
     np.random.seed(0)
-    # Question 1 - Load and preprocessing of housing prices dataset
-    load_data(r"C:\Users\eviatar\Desktop\eviatar\Study\YearD\semester b\I.M.L\repo\IML.HUJI\datasets\house_prices.csv")
+    # Question 1 - Load and preprocess of housing prices dataset
+    x_and_y = load_data(
+        r"C:\Users\eviatar\Desktop\eviatar\Study\YearD\semester b\I.M.L\repo\IML.HUJI\datasets\house_prices.csv")
 
     # Question 2 - Feature evaluation with respect to response
+    feature_evaluation(x_and_y[0], x_and_y[1])
     # raise NotImplementedError()
 
     # Question 3 - Split samples into training- and testing sets.
