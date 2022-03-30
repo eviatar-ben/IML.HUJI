@@ -21,9 +21,10 @@ def load_data(filename: str):
     """
     # TODO - replace below code with any desired preprocessing
 
-    data = pd.read_csv(filename, parse_dates=['booking_datetime', 'checkin_date']).dropna().drop_duplicates()
+    data = pd.read_csv(filename, parse_dates=['booking_datetime', 'checkin_date'])
     data['TimeDiff'] = (data['checkin_date'] - data['booking_datetime']).dt.days
-
+    print(data.isnull().sum())
+    print(data)
     # todo: switch day and month position
     # data['date'] = data['date'].dt.year.astype(str) + data['date'].dt.month.astype(str)
 
