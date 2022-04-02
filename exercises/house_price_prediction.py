@@ -31,7 +31,6 @@ def load_data(filename: str):
     # -dealing with nulls (since  data.isnull().sum() is very low we will drop them):
     data = data.dropna()
 
-
     # dealing with samples that has negative prices or houses that are too small
     data = data[(data["sqft_living"] > 15)]
     data = data[(data["price"] > 0)]
@@ -81,10 +80,14 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
         std = pd.Series.std(X.iloc[:, i]) * pd.Series.std(y)
         correlation = cov / std
         # print(correlation)
-        if i == 3:
-            px.scatter(x=X.iloc[:, i], y=y,
-                       title="Empirical PDF",
-                       labels=dict(x=column + " values", y="price")).show()
+        if i == 1:
+            plot = px.scatter(x=X.iloc[:, i], y=y,
+                              title=f"Pearson Correlation between {column} and response:",
+                              labels=dict(x=column + " values", y="price"))
+            feature_name = str(column)
+            plot.write_image(
+                r"C:\Users\eviatar\Desktop\eviatar\Study\YearD\semester b\I.M.L\repo\IML.HUJI\\"
+                + feature_name + "correlation.png")
 
 
 if __name__ == '__main__':
