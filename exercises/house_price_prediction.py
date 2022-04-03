@@ -10,6 +10,10 @@ import plotly.io as pio
 
 pio.templates.default = "simple_white"
 
+HOUSE_DATA = r"C:\Users\eviatar\Desktop\eviatar\Study\YearD\semester b\I.M.L\repo\IML.HUJI\datasets\house_prices.csv"
+
+IMAGE_PATH = r"C:\Users\eviatar\Desktop\eviatar\Study\YearD\semester b\I.M.L\repo\IML.HUJI\\"
+
 
 def load_data(filename: str):
     """
@@ -85,23 +89,22 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
                               title=f"Pearson Correlation between {column} and response:",
                               labels=dict(x=column + " values", y="price"))
             feature_name = str(column)
-            plot.write_image(
-                r"C:\Users\eviatar\Desktop\eviatar\Study\YearD\semester b\I.M.L\repo\IML.HUJI\\"
-                + feature_name + "correlation.png")
+            # todo: to delete this assignment
+            output_path = IMAGE_PATH
+            plot.write_image(output_path + feature_name + "correlation.png")
 
 
 if __name__ == '__main__':
     np.random.seed(0)
     # Question 1 - Load and preprocess of housing prices dataset
-    x_and_y = load_data(
-        r"C:\Users\eviatar\Desktop\eviatar\Study\YearD\semester b\I.M.L\repo\IML.HUJI\datasets\house_prices.csv")
+    x, y = load_data(HOUSE_DATA)
 
     # Question 2 - Feature evaluation with respect to response
-    feature_evaluation(x_and_y[0], x_and_y[1])
+    feature_evaluation(x, y)
     # raise NotImplementedError()
 
     # Question 3 - Split samples into training- and testing sets.
-    # raise NotImplementedError()
+    train_x, train_y, test_x, test_y = split_train_test(x, y)
 
     # Question 4 - Fit model over increasing percentages of the overall training data
     # For every percentage p in 10%, 11%, ..., 100%, repeat the following 10 times:
@@ -110,4 +113,18 @@ if __name__ == '__main__':
     #   3) Test fitted model over test set
     #   4) Store average and variance of loss over test set
     # Then plot average loss as function of training size with error ribbon of size (mean-2*std, mean+2*std)
-    # raise NotImplementedError()
+    means = []
+    for p in range(10, 101, 1):
+        linear_reg = LinearRegression()
+        p_losses = []
+        for _ in range(10):
+            train_proportion = p / 100
+            px_train, py_train, _, _ = split_train_test(train_x, train_y, train_proportion)
+            linear_reg.fit(px_train.to_numpy(), py_train.to_numpy())
+            # todo why not with the matching test proportion ?
+            loss = linear_reg.loss(test_x.to_numpy(), test_y.to_numpy())
+            p_losses.append(loss)
+        means.append(np.mean(p_losses))
+    figure = go.Figure([go.Scatter(x=np.arange(10, 101), y=means)])
+    figure.write_image(IMAGE_PATH + "means.png")
+    # figure.show(IMAGE_PATH + "means.png")

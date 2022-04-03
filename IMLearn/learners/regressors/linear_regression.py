@@ -52,7 +52,13 @@ class LinearRegression(BaseEstimator):
         """
         # raise NotImplementedError()
         # todo check what if self.include_intercept_
-        self.coefs_ = np.linalg.lstsq(X, y)
+        # self.coefs_ = np.linalg.lstsq(X, y)
+
+        if not self.include_intercept_:
+            mp_matrix = pinv(X)
+        else:
+            mp_matrix = pinv(np.c_[np.ones(X.shape[0]), X])
+        self.coefs_ = mp_matrix @ y
         self.fitted_ = True
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
@@ -71,7 +77,10 @@ class LinearRegression(BaseEstimator):
         """
         # raise NotImplementedError()
         # todo check the self.include_intercept_ and check the @
-        return X @ self.coefs_
+        if not self.include_intercept_:
+            return X @ self.coefs_
+        else:
+            return np.c_[np.ones(X.shape[0]), X] @ self.coefs_
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
