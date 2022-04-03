@@ -12,7 +12,7 @@ pio.templates.default = "simple_white"
 
 HOUSE_DATA = r"C:\Users\eviatar\Desktop\eviatar\Study\YearD\semester b\I.M.L\repo\IML.HUJI\datasets\house_prices.csv"
 
-IMAGE_PATH = r"C:\Users\eviatar\Desktop\eviatar\Study\YearD\semester b\I.M.L\repo\IML.HUJI\\"
+IMAGE_PATH = r"C:\Users\eviatar\Desktop\eviatar\Study\YearD\semester b\I.M.L\repo\IML.HUJI\plots\\"
 
 
 def load_data(filename: str):
@@ -79,19 +79,19 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
     # corr = X.corr()
     # corr.style.background_gradient(cmap='coolwarm').set_precision(2)
     for i, column in enumerate(X.columns):
-
         cov = pd.Series.cov(X.iloc[:, i], y)
         std = pd.Series.std(X.iloc[:, i]) * pd.Series.std(y)
         correlation = cov / std
+        # todo plot the correlation erase the trendline = 'ols'
         # print(correlation)
-        if i == 1:
-            plot = px.scatter(x=X.iloc[:, i], y=y,
-                              title=f"Pearson Correlation between {column} and response:",
-                              labels=dict(x=column + " values", y="price"))
-            feature_name = str(column)
-            # todo: to delete this assignment
-            output_path = IMAGE_PATH
-            plot.write_image(output_path + feature_name + "correlation.png")
+        plot = px.scatter(x=X.iloc[:, i], y=y, trendline="ols",
+                          title=f"Pearson Correlation between {column}"
+                                f" and response:\n [Pearson correlation = {correlation}]",
+                          labels=dict(x=column + " values", y="price"))
+        feature_name = str(column)
+        # todo: to delete this assignment
+        output_path = IMAGE_PATH
+        plot.write_image(output_path + feature_name + "correlation.png")
 
 
 if __name__ == '__main__':
@@ -125,6 +125,7 @@ if __name__ == '__main__':
             loss = linear_reg.loss(test_x.to_numpy(), test_y.to_numpy())
             p_losses.append(loss)
         means.append(np.mean(p_losses))
+    # todo: a lot is still missing. -2*std
     figure = go.Figure([go.Scatter(x=np.arange(10, 101), y=means)])
     figure.write_image(IMAGE_PATH + "means.png")
     # figure.show(IMAGE_PATH + "means.png")
