@@ -99,5 +99,4 @@ class LinearRegression(BaseEstimator):
         loss : float
             Performance under MSE loss function
         """
-        # raise NotImplementedError()
         return loss_functions.mean_square_error(y, self._predict(X))

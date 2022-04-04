@@ -10,8 +10,9 @@ import plotly.io as pio
 
 pio.templates.default = "simple_white"
 
-HOUSE_DATA = r"C:\Users\eviatar\Desktop\eviatar\Study\YearD\semester b\I.M.L\repo\IML.HUJI\datasets\house_prices.csv"
+HOUSE_DATA = r"../datasets/house_prices.csv"
 
+# todo: to comment
 IMAGE_PATH = r"C:\Users\eviatar\Desktop\eviatar\Study\YearD\semester b\I.M.L\repo\IML.HUJI\plots\ex2\house\\"
 
 
@@ -45,10 +46,10 @@ def load_data(filename: str):
     data['date'] = data['date'].dt.year.astype(str) + data['date'].dt.month.astype(str)
     data = pd.get_dummies(data=data, columns=['date'])
     # dealing Zip code by replacing it with One Hot representation:
-    # houses_df = pd.get_dummies(data=data, columns=['zipcode'])
+    data = pd.get_dummies(data=data, columns=['zipcode'])
 
     # dealing with feature that has a significant low correlation after plotting the heatmap.
-
+    data = data.drop(["yr_built"], axis=1)
     # features deduction
 
     # treating invalid/ missing values
@@ -82,14 +83,12 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
         cov = pd.Series.cov(X.iloc[:, i], y)
         std = pd.Series.std(X.iloc[:, i]) * pd.Series.std(y)
         correlation = cov / std
-        # todo plot the correlation erase the trendline = 'ols'
-        # print(correlation)
-        plot = px.scatter(x=X.iloc[:, i], y=y, trendline="ols",
+
+        plot = px.scatter(x=X.iloc[:, i], y=y, trendline="ols", trendline_color_override="black",
                           title=f"Pearson Correlation between {column}"
-                                f" and response:\n [Pearson correlation = {correlation}]",
+                                f" and response:\n [P.C = {np.round(correlation, 2)}]",
                           labels=dict(x=column + " values", y="price"))
         feature_name = str(column)
-        # todo: to delete this assignment
         output_path = IMAGE_PATH
         plot.write_image(output_path + feature_name + "correlation.png")
 
@@ -100,7 +99,7 @@ if __name__ == '__main__':
     x, y = load_data(HOUSE_DATA)
 
     # Question 2 - Feature evaluation with respect to response
-    feature_evaluation(x, y)
+    # feature_evaluation(x, y)
     # raise NotImplementedError()
 
     # Question 3 - Split samples into training- and testing sets.
@@ -114,8 +113,9 @@ if __name__ == '__main__':
     #   4) Store average and variance of loss over test set
     # Then plot average loss as function of training size with error ribbon of size (mean-2*std, mean+2*std)
     means = []
+    stds = []
+    linear_reg = LinearRegression()
     for p in range(10, 101, 1):
-        linear_reg = LinearRegression()
         p_losses = []
         for _ in range(10):
             train_proportion = p / 100
@@ -125,7 +125,17 @@ if __name__ == '__main__':
             loss = linear_reg.loss(test_x.to_numpy(), test_y.to_numpy())
             p_losses.append(loss)
         means.append(np.mean(p_losses))
-    # todo: a lot is still missing. -2*std
-    figure = go.Figure([go.Scatter(x=np.arange(10, 101), y=means)])
-    figure.write_image(IMAGE_PATH + "means.png")
-    # figure.show(IMAGE_PATH + "means.png")
+        stds.append(np.std(p_losses))
+    means = np.asarray(means)
+    stds = np.asarray(stds)
+
+    figure = go.Figure([go.Scatter(x=np.arange(10, 101), y=means, mode='lines'),
+                        go.Scatter(x=np.arange(10, 101), y=means + 2 * stds, showlegend=False,
+                                   marker=dict(color='lightgrey'), name="Confidence"),
+                        go.Scatter(x=np.arange(10, 101), y=means - 2 * stds, fill='tonexty', showlegend=False,
+                                   mode="lines", marker=dict(color='lightgrey'), name="Confidence")])
+    figure.update_xaxes(title_text="training-set's percents")
+    figure.update_yaxes(title_text="test-set's loss")
+    figure.update_layout(title_text="Loss as function of training size")
+    figure.write_image(IMAGE_PATH + "mean.png")
+    figure.show()
