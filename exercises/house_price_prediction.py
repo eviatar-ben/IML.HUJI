@@ -12,6 +12,7 @@ pio.templates.default = "simple_white"
 
 HOUSE_DATA = r"../datasets/house_prices.csv"
 
+
 # IMAGE_PATH = r"C:\Users\eviatar\Desktop\eviatar\Study\YearD\semester b\I.M.L\repo\IML.HUJI\plots\ex2\house\\"
 
 
@@ -79,7 +80,6 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
         cov = pd.Series.cov(X.iloc[:, i], y)
         std = pd.Series.std(X.iloc[:, i]) * pd.Series.std(y)
         correlation = cov / std
-
         plot = px.scatter(x=X.iloc[:, i], y=y, trendline="ols", trendline_color_override="black",
                           title=f"Pearson Correlation between {column}"
                                 f" and response:\n [P.C = {np.round(correlation, 2)}]",
@@ -89,14 +89,20 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
         plot.write_image(output_path + feature_name + "correlation.png")
         plot.show()
 
+
 if __name__ == '__main__':
     np.random.seed(0)
     # Question 1 - Load and preprocess of housing prices dataset
     x, y = load_data(HOUSE_DATA)
 
     # Question 2 - Feature evaluation with respect to response
-    # feature_evaluation(x, y)
-    # raise NotImplementedError()
+    feature_evaluation(x, y)
+    # High degree: If the coefficient value lies between ± 0.50 and ± 1,
+    # then it is said to be a strong correlation.
+    # Moderate degree: If the value lies between ± 0.30 and ± 0.49,
+    # then it is said to be a medium correlation.
+    # Low degree: When the value lies below + . 29,
+    # then it is said to be a small correlation.
 
     # Question 3 - Split samples into training- and testing sets.
     train_x, train_y, test_x, test_y = split_train_test(x, y)
