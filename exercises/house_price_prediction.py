@@ -12,8 +12,7 @@ pio.templates.default = "simple_white"
 
 HOUSE_DATA = r"../datasets/house_prices.csv"
 
-# todo: to comment
-IMAGE_PATH = r"C:\Users\eviatar\Desktop\eviatar\Study\YearD\semester b\I.M.L\repo\IML.HUJI\plots\ex2\house\\"
+# IMAGE_PATH = r"C:\Users\eviatar\Desktop\eviatar\Study\YearD\semester b\I.M.L\repo\IML.HUJI\plots\ex2\house\\"
 
 
 def load_data(filename: str):
@@ -42,7 +41,6 @@ def load_data(filename: str):
 
     # replace the date with One Hot representation of month and year:
     data['date'] = pd.to_datetime(data['date'])
-    # todo: switch day and month position
     data['date'] = data['date'].dt.year.astype(str) + data['date'].dt.month.astype(str)
     data = pd.get_dummies(data=data, columns=['date'])
     # dealing Zip code by replacing it with One Hot representation:
@@ -77,8 +75,6 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
     output_path: str (default ".")
         Path to folder in which plots are saved
     """
-    # corr = X.corr()
-    # corr.style.background_gradient(cmap='coolwarm').set_precision(2)
     for i, column in enumerate(X.columns):
         cov = pd.Series.cov(X.iloc[:, i], y)
         std = pd.Series.std(X.iloc[:, i]) * pd.Series.std(y)
@@ -89,9 +85,9 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
                                 f" and response:\n [P.C = {np.round(correlation, 2)}]",
                           labels=dict(x=column + " values", y="price"))
         feature_name = str(column)
-        output_path = IMAGE_PATH
+        # output_path = IMAGE_PATH
         plot.write_image(output_path + feature_name + "correlation.png")
-
+        plot.show()
 
 if __name__ == '__main__':
     np.random.seed(0)
@@ -137,5 +133,5 @@ if __name__ == '__main__':
     figure.update_xaxes(title_text="training-set's percents")
     figure.update_yaxes(title_text="test-set's loss")
     figure.update_layout(title_text="Loss as function of training size")
-    figure.write_image(IMAGE_PATH + "mean.png")
+    # figure.write_image(IMAGE_PATH + "mean.png")
     figure.show()
