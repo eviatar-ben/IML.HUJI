@@ -4,6 +4,8 @@ from typing import NoReturn
 from ...base import BaseEstimator
 import numpy as np
 
+from ...metrics import misclassification_error
+
 
 def default_callback(fit: Perceptron, x: np.ndarray, y: int):
     pass
@@ -102,11 +104,13 @@ class Perceptron(BaseEstimator):
         while counter < self.max_iter_:
             deviations = y * (X @ self.coefs_)  # n_samples row vector of deviations for each sample
             if np.any(deviations <= 0):
-                deviate_idx = np.argwhere(deviations < 0)[0][0]  # getting the first deviation is enough
+                deviate_idx = np.argwhere(deviations <= 0)[0][0]  # getting the first deviation is enough
                 self.coefs_ += X[deviate_idx] * y[deviate_idx]
             else:
                 break
             counter += 1
+            # self.callback_(self)
+            self.callback_(self)
         self.fitted_ = True
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
@@ -123,7 +127,14 @@ class Perceptron(BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        raise NotImplementedError()
+        if self.include_intercept_:
+            X = np.hstack((X, np.ones((X.shape[0], 1))))
+
+        # todo: check if np.sign is not  redaudant
+
+        # return np.where(X @ self.coefs_ <= 0, -1, 1)
+
+        return np.where(np.sign(X @ self.coefs_) <= 0, -1, 1)
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
@@ -142,4 +153,5 @@ class Perceptron(BaseEstimator):
         loss : float
             Performance under missclassification loss function
         """
-        raise NotImplementedError()
+        # raise NotImplementedError()
+        return misclassification_error(y, self._predict(X))
