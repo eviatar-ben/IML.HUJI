@@ -33,6 +33,7 @@ class Perceptron(BaseEstimator):
         to be filled in `Perceptron.fit` function.
 
     """
+
     def __init__(self,
                  include_intercept: bool = True,
                  max_iter: int = 1000,
@@ -90,7 +91,23 @@ class Perceptron(BaseEstimator):
         -----
         Fits model with or without an intercept depending on value of `self.fit_intercept_`
         """
-        raise NotImplementedError()
+        # raise NotImplementedError()
+        counter = 0
+        if self.include_intercept_:
+            # todo" check the first versus last columns
+            X = np.c_[X, np.ones(X.shape[0])]
+            # X = np.c_[np.ones(X.shape[0]), X]
+        self.coefs_ = np.zeros(X.shape[1])
+
+        while counter < self.max_iter_:
+            deviations = y * (X @ self.coefs_)  # n_samples row vector of deviations for each sample
+            if np.any(deviations <= 0):
+                deviate_idx = np.argwhere(deviations < 0)[0][0]  # getting the first deviation is enough
+                self.coefs_ += X[deviate_idx] * y[deviate_idx]
+            else:
+                break
+            counter += 1
+        self.fitted_ = True
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
