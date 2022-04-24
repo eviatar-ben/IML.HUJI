@@ -130,11 +130,10 @@ class Perceptron(BaseEstimator):
         if self.include_intercept_:
             X = np.hstack((X, np.ones((X.shape[0], 1))))
 
-        # todo: check if np.sign is not  redaudant
+        # todo: check if np.sign is not  redaudant there is bug here need to be fixed to 0.7
+        # todo dimansion problam
 
-        # return np.where(X @ self.coefs_ <= 0, -1, 1)
-
-        return np.where(np.sign(X @ self.coefs_) <= 0, -1, 1)
+        return np.where(X @ self.coefs_ <= 0, -1, 1)
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
