@@ -2,6 +2,7 @@ from typing import NoReturn
 from ...base import BaseEstimator
 import numpy as np
 from numpy.linalg import det, inv
+from ...metrics import misclassification_error
 
 
 class LDA(BaseEstimator):
@@ -74,7 +75,7 @@ class LDA(BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        return np.array([self.classes_[np.argmax(likelihood_of_k)] for likelihood_of_k in self.likelihood(X)])
+        return np.asarray([self.classes_[k] for k in np.argmax(self.likelihood(X), axis=1)])
 
     def likelihood(self, X: np.ndarray) -> np.ndarray:
         """
@@ -125,5 +126,4 @@ class LDA(BaseEstimator):
         loss : float
             Performance under missclassification loss function
         """
-        from ...metrics import misclassification_error
         return misclassification_error(y, self.predict(X))

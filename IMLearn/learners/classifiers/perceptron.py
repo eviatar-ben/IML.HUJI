@@ -100,7 +100,7 @@ class Perceptron(BaseEstimator):
             X = np.c_[X, np.ones(X.shape[0])]
             # X = np.c_[np.ones(X.shape[0]), X]
         self.coefs_ = np.zeros(X.shape[1])
-
+        # todo : check o coordinate convertion to -1
         while counter < self.max_iter_:
             deviations = y * (X @ self.coefs_)  # n_samples row vector of deviations for each sample
             if np.any(deviations <= 0):

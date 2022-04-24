@@ -62,7 +62,8 @@ def compare_gaussian_classifiers():
     """
     for f in ["gaussian1.npy", "gaussian2.npy"]:
         # Load dataset
-        raise NotImplementedError()
+        X, y = load_dataset(f"../datasets/{f}")
+
 
         # Fit models and predict over training set
         raise NotImplementedError()
