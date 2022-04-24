@@ -84,7 +84,7 @@ class GaussianNaiveBayes(BaseEstimator):
         return np.asarray([np.log(self.pi_[k])
                            - np.sum(np.log(self.vars_[k]))
                            - 0.5 * np.sum(np.power((X - self.mu_[k]) / self.vars_[k], 2), axis=1) for k in
-                           self.classes_])
+                           self.classes_]).T
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """

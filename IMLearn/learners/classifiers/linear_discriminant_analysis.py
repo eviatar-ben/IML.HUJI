@@ -48,17 +48,30 @@ class LDA(BaseEstimator):
         y : ndarray of shape (n_samples, )
             Responses of input data to fit to
         """
+
+        def myfunc(a, b):
+            "Return a-b if a>b, otherwise return a+b"
+            if a > b:
+                return a - b
+            else:
+                return a + b
+
         self.classes_, counts = np.unique(y, return_counts=True)
         pi_k = dict(zip(self.classes_, counts))
 
-        assert len(y) == y.size
         self.pi_ = counts / len(y)
-        self.mu_ = [np.sum(X[np.where(y == k)], axis=0) / pi_k[k] for k in self.classes_]
-        yi_to_mui = np.vectorize(lambda i: self.mu_[i])
-        yi_mui = yi_to_mui([y])
-        v = X - yi_mui
-        # todo: check the divisor - len(self.classes_)
-        self.cov_ = np.sum(v * v.T, axis=0) / (X.shape[0] - len(self.classes_))
+        assert np.sum(self.pi_) > 0.99
+        assert np.sum(self.pi_) < 1.01
+
+        self.mu_ = [np.sum(X[np.where(y == k)], axis=0) / pi_k[i] for i, k in enumerate(self.classes_)]
+
+        inner_prod = []
+        for i, k in enumerate(self.classes_):
+            v = X[y == k] - self.mu_[i]
+            inner_prod.append(v.T@ v)
+
+        # todo: double check the divisor - len(self.classes_)
+        self.cov_ = np.sum(np.asarray(inner_prod), axis=0) / (X.shape[0] - len(self.classes_))
         self._cov_inv = inv(self.cov_)
 
     def _predict(self, X: np.ndarray) -> np.ndarray:

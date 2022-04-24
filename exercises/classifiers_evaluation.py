@@ -51,7 +51,7 @@ def run_perceptron():
                         layout=go.Layout(title=f"Perceptron's' training loss values for {n}",
                                          xaxis_title="iteration",
                                          yaxis_title="loss"))
-        fig.show()
+        # fig.show()
 
 
 def get_ellipse(mu: np.ndarray, cov: np.ndarray):
@@ -83,31 +83,40 @@ def compare_gaussian_classifiers():
     """
     Fit both Gaussian Naive Bayes and LDA classifiers on both gaussians1 and gaussians2 datasets
     """
+
     for f in ["gaussian1.npy", "gaussian2.npy"]:
         # Load dataset
         X, y = load_dataset(f"../datasets/{f}")
 
-
         # Fit models and predict over training set
-        raise NotImplementedError()
+        lda = LDA()
+        gmb = GaussianNaiveBayes()
+
+        lda.fit(X, y)
+        gmb.fit(X, y)
+
+        lda_pred = lda.predict(X)
+        gmb_pred = gmb.predict(X)
 
         # Plot a figure with two suplots, showing the Gaussian Naive Bayes predictions on the left and LDA predictions
         # on the right. Plot title should specify dataset used and subplot titles should specify algorithm and accuracy
         # Create subplots
         from IMLearn.metrics import accuracy
-        raise NotImplementedError()
-
+        fig = make_subplots(rows=1, cols=2, vertical_spacing=0.06, horizontal_spacing=0.02,
+                            subplot_titles=[f"LDA classifier, with accuracy: {accuracy(y, lda_pred)}",
+                                            f"GNB classifier,  with accuracy: {accuracy(y, gmb_pred)}"])
+        fig.update_layout(title=f"Dataset: {f}")
         # Add traces for data-points setting symbols and colors
-        raise NotImplementedError()
+        fig.add_trace(go.Scatter(x=X[:, 0], y=X[:, 1], mode="markers", showlegend=False,
+                                 marker=dict(color=lda_pred, symbol=y, line=dict(color="black", width=1))), 1, 1)
 
         # Add `X` dots specifying fitted Gaussians' means
-        raise NotImplementedError()
 
         # Add ellipses depicting the covariances of the fitted Gaussians
-        raise NotImplementedError()
+        fig.show()
 
 
 if __name__ == '__main__':
     np.random.seed(0)
-    run_perceptron()
-    # compare_gaussian_classifiers()
+    # run_perceptron()
+    compare_gaussian_classifiers()
