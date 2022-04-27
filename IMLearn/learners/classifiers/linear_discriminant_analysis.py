@@ -2,7 +2,6 @@ from typing import NoReturn
 from ...base import BaseEstimator
 import numpy as np
 from numpy.linalg import det, inv
-from ...metrics import misclassification_error
 
 
 class LDA(BaseEstimator):
@@ -49,13 +48,6 @@ class LDA(BaseEstimator):
             Responses of input data to fit to
         """
 
-        def myfunc(a, b):
-            "Return a-b if a>b, otherwise return a+b"
-            if a > b:
-                return a - b
-            else:
-                return a + b
-
         self.classes_, counts = np.unique(y, return_counts=True)
         pi_k = dict(zip(self.classes_, counts))
 
@@ -66,11 +58,14 @@ class LDA(BaseEstimator):
         self.mu_ = [np.sum(X[np.where(y == k)], axis=0) / pi_k[i] for i, k in enumerate(self.classes_)]
 
         inner_prod = []
+        # enumerate for cases which k !=  i indices
         for i, k in enumerate(self.classes_):
-            v = X[y == k] - self.mu_[i]
-            inner_prod.append(v.T@ v)
+            # summing according to k (the label index) instead of  the sample index)
+            v = (X[y == k] - self.mu_[i]).T
+            inner_prod.append(v @ v.T)
 
         # todo: double check the divisor - len(self.classes_)
+        # self.cov_ = np.sum(np.asarray(inner_prod), axis=0) / (X.shape[0] )
         self.cov_ = np.sum(np.asarray(inner_prod), axis=0) / (X.shape[0] - len(self.classes_))
         self._cov_inv = inv(self.cov_)
 
@@ -110,16 +105,10 @@ class LDA(BaseEstimator):
 
         result = []
         for k in self.classes_:
-            a = X @ self._cov_inv.dot(self.mu_[k])
-            b = -0.5 * self.mu_[k].dot(self._cov_inv).dot(self.mu_[k])
+            a = X @ self._cov_inv @ self.mu_[k]
+            b = -0.5 * self.mu_[k] @ self._cov_inv @ self.mu_[k]
             result.append(np.log(self.pi_[k]) + a + b)
 
-        # return np.asarray([np.log(self.pi_[k]) + (X@self._cov_inv).dot(self.mu_[k]) -0.5*self.mu_[k]
-        # for k in self.classes_])
-
-        # return np.array([np.log(self.pi_[k])
-        #                  + X @ self._cov_inv @ self.mu_[k]
-        #                  - 0.5 * self.mu_[k].T @ self._cov_inv @ self.mu_[k] for k in self.classes_]).T
         return np.asarray(result).T
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
@@ -141,4 +130,4 @@ class LDA(BaseEstimator):
         """
 
         from ...metrics import misclassification_error
-        raise NotImplementedError()
+        return misclassification_error(y, self.predict(X))

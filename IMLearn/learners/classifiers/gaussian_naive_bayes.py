@@ -1,7 +1,6 @@
 from typing import NoReturn
 from ...base import BaseEstimator
 import numpy as np
-from ...metrics import misclassification_error
 
 
 class GaussianNaiveBayes(BaseEstimator):
@@ -105,4 +104,4 @@ class GaussianNaiveBayes(BaseEstimator):
         """
 
         from ...metrics import misclassification_error
-        raise NotImplementedError()
+        return misclassification_error(y, self.predict(X))

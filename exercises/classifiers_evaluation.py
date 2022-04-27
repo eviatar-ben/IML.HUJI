@@ -51,7 +51,7 @@ def run_perceptron():
                         layout=go.Layout(title=f"Perceptron's' training loss values for {n}",
                                          xaxis_title="iteration",
                                          yaxis_title="loss"))
-        # fig.show()
+        fig.show()
 
 
 def get_ellipse(mu: np.ndarray, cov: np.ndarray):
