@@ -55,7 +55,7 @@ class LDA(BaseEstimator):
         assert np.sum(self.pi_) > 0.99
         assert np.sum(self.pi_) < 1.01
 
-        self.mu_ = [np.sum(X[np.where(y == k)], axis=0) / pi_k[i] for i, k in enumerate(self.classes_)]
+        self.mu_ = np.asarray([np.sum(X[np.where(y == k)], axis=0) / pi_k[i] for i, k in enumerate(self.classes_)])
 
         inner_prod = []
         # enumerate for cases which k !=  i indices
@@ -66,7 +66,7 @@ class LDA(BaseEstimator):
 
         # todo: double check the divisor - len(self.classes_)
         # self.cov_ = np.sum(np.asarray(inner_prod), axis=0) / (X.shape[0] )
-        self.cov_ = np.sum(np.asarray(inner_prod), axis=0) / (X.shape[0] - len(self.classes_))
+        self.cov_ = np.asarray(np.sum(np.asarray(inner_prod), axis=0) / (X.shape[0] - len(self.classes_)))
         self._cov_inv = inv(self.cov_)
 
     def _predict(self, X: np.ndarray) -> np.ndarray:

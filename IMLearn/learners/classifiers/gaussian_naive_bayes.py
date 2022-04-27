@@ -43,8 +43,8 @@ class GaussianNaiveBayes(BaseEstimator):
         """
         self.classes_, counts = np.unique(y, return_counts=True)
         self.pi_ = counts / len(y)
-        self.mu_ = [X[y == k].mean(axis=0) for k in self.classes_]
-        self.vars_ = [X[y == k].var(axis=0) for k in self.classes_]
+        self.mu_ = np.asarray([X[y == k].mean(axis=0) for k in self.classes_])
+        self.vars_ = np.asarray([X[y == k].var(axis=0) for k in self.classes_])
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -79,7 +79,6 @@ class GaussianNaiveBayes(BaseEstimator):
         """
         if not self.fitted_:
             raise ValueError("Estimator must first be fitted before calling `likelihood` function")
-        # todo:  research is needed
         return np.asarray([np.log(self.pi_[k])
                            - np.sum(np.log(self.vars_[k]))
                            - 0.5 * np.sum(np.power((X - self.mu_[k]) / self.vars_[k], 2), axis=1) for k in

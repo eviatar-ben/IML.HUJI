@@ -90,33 +90,51 @@ def compare_gaussian_classifiers():
 
         # Fit models and predict over training set
         lda = LDA()
-        gmb = GaussianNaiveBayes()
+        gnb = GaussianNaiveBayes()
 
         lda.fit(X, y)
-        gmb.fit(X, y)
+        gnb.fit(X, y)
 
         lda_pred = lda.predict(X)
-        gmb_pred = gmb.predict(X)
+        gnb_pred = gnb.predict(X)
 
         # Plot a figure with two suplots, showing the Gaussian Naive Bayes predictions on the left and LDA predictions
         # on the right. Plot title should specify dataset used and subplot titles should specify algorithm and accuracy
         # Create subplots
         from IMLearn.metrics import accuracy
         fig = make_subplots(rows=1, cols=2, vertical_spacing=0.06, horizontal_spacing=0.02,
-                            subplot_titles=[f"LDA classifier, with accuracy: {accuracy(y, lda_pred)}",
-                                            f"GNB classifier,  with accuracy: {accuracy(y, gmb_pred)}"])
-        fig.update_layout(title=f"Dataset: {f}")
+                            subplot_titles=[f"LDA classifier, with accuracy: {np.round(accuracy(y, lda_pred), 3)}",
+                                            f"GNB classifier,  with accuracy: {np.round(accuracy(y, gnb_pred), 3)}"])
+
+        fig.update_layout(title=f"Dataset: {f.split('.')[0]}\n\n")
+
         # Add traces for data-points setting symbols and colors
         fig.add_trace(go.Scatter(x=X[:, 0], y=X[:, 1], mode="markers", showlegend=False,
-                                 marker=dict(color=lda_pred, symbol=y, line=dict(color="black", width=1))), 1, 1)
+                                 marker=dict(color=lda_pred, symbol=y, line=dict(color="Black", width=1))), 1, 1)
+
+        fig.add_trace(go.Scatter(x=X[:, 0], y=X[:, 1], mode="markers", showlegend=False,
+                                 marker=dict(color=gnb_pred, symbol=y, line=dict(color="Black", width=1))), 1, 2)
 
         # Add `X` dots specifying fitted Gaussians' means
+        fig.add_trace(go.Scatter(x=lda.mu_[:, 0], y=lda.mu_[:, 1], mode="markers", showlegend=False,
+                                 marker=dict(color="Black", symbol="x", size=15)), 1, 1)
+
+        fig.add_trace(go.Scatter(x=gnb.mu_[:, 0], y=gnb.mu_[:, 1], mode="markers", showlegend=False,
+                                 marker=dict(color="Black", symbol="x", size=15)), 1, 2)
 
         # Add ellipses depicting the covariances of the fitted Gaussians
+        fig.add_trace(get_ellipse(lda.mu_[0], lda.cov_), 1, 1)
+        fig.add_trace(get_ellipse(lda.mu_[1], lda.cov_), 1, 1)
+        fig.add_trace(get_ellipse(lda.mu_[2], lda.cov_), 1, 1)
+
+        fig.add_trace(get_ellipse(gnb.mu_[0], np.diag(gnb.vars_[0])), 1, 2)
+        fig.add_trace(get_ellipse(gnb.mu_[1], np.diag(gnb.vars_[1])), 1, 2)
+        fig.add_trace(get_ellipse(gnb.mu_[2], np.diag(gnb.vars_[2])), 1, 2)
+
         fig.show()
 
 
 if __name__ == '__main__':
     np.random.seed(0)
-    # run_perceptron()
+    run_perceptron()
     compare_gaussian_classifiers()
