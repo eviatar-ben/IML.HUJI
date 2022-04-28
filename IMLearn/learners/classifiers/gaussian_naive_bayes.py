@@ -77,12 +77,16 @@ class GaussianNaiveBayes(BaseEstimator):
             The likelihood for each sample under each of the classes
 
         """
-        if not self.fitted_:
-            raise ValueError("Estimator must first be fitted before calling `likelihood` function")
-        return np.asarray([np.log(self.pi_[k])
-                           - np.sum(np.log(self.vars_[k]))
-                           - 0.5 * np.sum(np.power((X - self.mu_[k]) / self.vars_[k], 2), axis=1) for k in
-                           self.classes_]).T
+        y = []
+        c = -0.5 * X.shape[1] * np.log(2 * np.pi)
+        for i in self.classes_:
+            a = np.log(self.pi_[i])
+            b = -0.5 * np.log(np.linalg.det(np.diag(self.vars_[i])))
+            x_minus_mu = X - self.mu_[i]
+            d = -0.5 * np.einsum("ij,jk,ik->i", x_minus_mu, np.linalg.inv(np.diag(self.vars_[i])), x_minus_mu)
+            y.append(a + b + c + d)
+
+        return np.asarray(y).T
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """

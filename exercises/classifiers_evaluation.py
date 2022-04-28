@@ -106,7 +106,7 @@ def compare_gaussian_classifiers():
                             subplot_titles=[f"LDA classifier, with accuracy: {np.round(accuracy(y, lda_pred), 3)}",
                                             f"GNB classifier,  with accuracy: {np.round(accuracy(y, gnb_pred), 3)}"])
 
-        fig.update_layout(title=f"Dataset: {f.split('.')[0]}\n\n")
+        fig.update_layout(title=f"Dataset: {f.split('.')[0]}\n\n", showlegend=False)
 
         # Add traces for data-points setting symbols and colors
         fig.add_trace(go.Scatter(x=X[:, 0], y=X[:, 1], mode="markers", showlegend=False,
@@ -136,5 +136,5 @@ def compare_gaussian_classifiers():
 
 if __name__ == '__main__':
     np.random.seed(0)
-    run_perceptron()
+    # run_perceptron()
     compare_gaussian_classifiers()

@@ -64,7 +64,6 @@ class LDA(BaseEstimator):
             v = (X[y == k] - self.mu_[i]).T
             inner_prod.append(v @ v.T)
 
-        # todo: double check the divisor - len(self.classes_)
         # self.cov_ = np.sum(np.asarray(inner_prod), axis=0) / (X.shape[0] )
         self.cov_ = np.asarray(np.sum(np.asarray(inner_prod), axis=0) / (X.shape[0] - len(self.classes_)))
         self._cov_inv = inv(self.cov_)
