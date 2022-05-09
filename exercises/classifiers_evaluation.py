@@ -133,8 +133,8 @@ def compare_gaussian_classifiers():
 
         fig.show()
 
-
 if __name__ == '__main__':
     np.random.seed(0)
-    # run_perceptron()
+    run_perceptron()
     compare_gaussian_classifiers()
+    # quiz2()
