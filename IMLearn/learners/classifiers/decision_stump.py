@@ -40,11 +40,9 @@ class DecisionStump(BaseEstimator):
         y : ndarray of shape (n_samples, )
             Responses of input data to fit to
         """
-        # todo: are samples from R ? what about iterating over d?
         cur_err = np.inf
         for i in range(X.shape[1]):
             # todo: maybe subtract y
-
             p_thr, p_thr_err = self._find_threshold(X[:, i], y, 1)
             if p_thr_err < cur_err:
                 cur_err = p_thr_err
@@ -53,7 +51,7 @@ class DecisionStump(BaseEstimator):
             n_thr, n_thr_err = self._find_threshold(X[:, i], y, -1)
             if n_thr_err < cur_err:
                 cur_err = n_thr_err
-                self.threshold_, self.j_, self.sign_ = p_thr, i, -1
+                self.threshold_, self.j_, self.sign_ = n_thr, i, -1
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -77,7 +75,9 @@ class DecisionStump(BaseEstimator):
         Feature values strictly below threshold are predicted as `-sign` whereas values which equal
         to or above the threshold are predicted as `sign`
         """
-        pass
+        res = (X[:, self.j_] - self.threshold_ >= 0) * self.sign_
+        res[res == 0] = -self.sign_
+        return res
 
     def _find_threshold(self, values: np.ndarray, labels: np.ndarray, sign: int) -> Tuple[float, float]:
         """
@@ -87,10 +87,10 @@ class DecisionStump(BaseEstimator):
 
         Parameters
         ----------
-        values: ndarray of shape (n_samples,)
+        feature_vals: ndarray of shape (n_samples,)
             A feature vector to find a splitting threshold for
 
-        labels: ndarray of shape (n_samples,)
+        labels_distrebuted: ndarray of shape (n_samples,)
             The labels to compare against
 
         sign: int
@@ -109,19 +109,35 @@ class DecisionStump(BaseEstimator):
         For every tested threshold, values strictly below threshold are predicted as `-sign` whereas values
         which equal to or above the threshold are predicted as `sign`
         """
-        sorted_indices = np.argsort(values)
-        values, labels = values[sorted_indices], labels[sorted_indices]
+        # sorted_indices = np.argsort(values)
+        # feature_vals, labels = values[sorted_indices], labels[sorted_indices]
+        # # todo: this implementation need efficiency improvements
         # # the misclassification error
         # mse = []
         # for i in range(len(labels)):
         #     same_sign = labels[i:]
         #     other_sign = labels[:i]
-        #     same_sign_dif = np.sum(same_sign) - sign * (len(labels) - i)
+        #     same_sign_dif = np.sum(np.abs(same_sign)) - sign * (np.sum(labels) - i)
         #     other_sign_dif = np.sum(other_sign) + sign * i
         #     mse.append(same_sign_dif + other_sign_dif)
         # mse = np.asarray(mse)
         # minimizer_idx = np.argmin(mse)
-        # return minimizer_idx, mse[minimizer_idx]
+        #
+        # return feature_vals[minimizer_idx], mse[minimizer_idx]
+
+        # ----------------------------------------------------------------------------------------------------------
+        # changing to school solution for the sake of efficiency:
+        # sort the data so that x1 <= x2 <= ... <= xm
+        sort_idx = np.argsort(values)
+        values, labels = values[sort_idx], labels[sort_idx]
+
+        thetas = np.concatenate([[-np.inf], (values[1:] + values[:-1]) / 2, [np.inf]])
+        minimal_theta_loss = np.sum(np.abs(labels[sign != np.sign(labels)]))  # loss of the smallest possible theta
+
+        losses = np.append(minimal_theta_loss, minimal_theta_loss + np.cumsum(labels * sign))
+        # losses = np.append(minimal_theta_loss, minimal_theta_loss - np.cumsum(labels * sign))
+        min_loss_idx = np.argmin(losses)
+        return thetas[min_loss_idx], losses[min_loss_idx]
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
