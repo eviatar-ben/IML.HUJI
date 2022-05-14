@@ -77,6 +77,7 @@ class DecisionStump(BaseEstimator):
         """
         res = (X[:, self.j_] - self.threshold_ >= 0) * self.sign_
         res[res == 0] = -self.sign_
+
         return res
 
     def _find_threshold(self, values: np.ndarray, labels: np.ndarray, sign: int) -> Tuple[float, float]:
@@ -130,8 +131,9 @@ class DecisionStump(BaseEstimator):
         # sort the data so that x1 <= x2 <= ... <= xm
         sort_idx = np.argsort(values)
         values, labels = values[sort_idx], labels[sort_idx]
+        # thetas = np.concatenate([[-np.inf], (values[1:] + values[:-1]) / 2, [np.inf]])
+        thetas = np.concatenate([values, [np.inf]])
 
-        thetas = np.concatenate([[-np.inf], (values[1:] + values[:-1]) / 2, [np.inf]])
         minimal_theta_loss = np.sum(np.abs(labels[sign != np.sign(labels)]))  # loss of the smallest possible theta
 
         losses = np.append(minimal_theta_loss, minimal_theta_loss + np.cumsum(labels * sign))
