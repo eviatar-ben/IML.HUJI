@@ -13,7 +13,6 @@ pio.templates.default = "simple_white"
 HOUSE_DATA = r"../datasets/house_prices.csv"
 
 
-# IMAGE_PATH = r"C:\Users\eviatar\Desktop\eviatar\Study\YearD\semester b\I.M.L\repo\IML.HUJI\plots\ex2\house\\"
 
 
 def load_data(filename: str):
