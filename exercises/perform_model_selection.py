@@ -43,20 +43,40 @@ def select_polynomial_degree(n_samples: int = 100, noise: float = 5):
     fig = go.Figure(
         [go.Scatter(x=x, y=f, mode='lines+markers', marker=dict(color="black"), name=r'Noiseless Model'),
          go.Scatter(x=X_train, y=y_train, mode='markers', name=r'Train samples'),
-         go.Scatter(x=X_test, y=y_test, mode='markers', name=r'Test samples')]
-    )
+         go.Scatter(x=X_test, y=y_test, mode='markers', name=r'Test samples')])
     fig.update_xaxes(title_text="x")
     fig.update_yaxes(title_text="y")
     fig.update_layout(title_text=rf"Generated a dataset of {n_samples} samples and noise={noise}")
     # fig.show()
-    # fig.write_image(f"./Plots/ex5/'Noiseless Model noise ={noise}.png")
 
     # Question 2 - Perform CV for polynomial fitting with degrees 0,1,...,10
     average_training_and_validation_errors = [cross_validate(PolynomialFitting(k), X_train, y_train, mean_square_error)
                                               for k in range(11)]
+    average_training_errors = [tup[0] for tup in average_training_and_validation_errors]
+    average_validation_errors = [tup[1] for tup in average_training_and_validation_errors]
+    ks = [k for k in range(11)]
+
+    fig = go.Figure(
+        [go.Scatter(x=ks, y=average_training_errors, mode='markers', marker=dict(color="black"),
+                    name=fr'Average training errors'),
+         go.Scatter(x=ks, y=average_validation_errors, mode='markers', name=r'Average validation errors samples')])
+
+    fig.update_xaxes(title_text="x")
+    fig.update_yaxes(title_text="y")
+    fig.update_layout(title_text=f"5-fold cross-validation for each of the polynomial degrees k = 0,1,...,10\n"
+                                 f" As a function of training- and validation errors\n"
+                                 f"({n_samples} samples and noise={noise})")
+    fig.show()
 
     # Question 3 - Using best value of k, fit a k-degree polynomial model and report test error
-    raise NotImplementedError()
+    k = np.argmin(average_validation_errors)
+    est = PolynomialFitting(k)
+    est.fit(X_train, y_train)
+    test_error = mean_square_error(y_test, est.predict(X_test))
+    print(f"\nFor a Model with {n_samples} samples and noise={noise}:")
+    print(f"{k} is the polynomial degree for which the lowest validation error was achieved")
+    print(f"polynomial degree with {k} got MSE= {np.round(test_error, 2)}.")
+    print(f"polynomial degree with {k}  got Validation MSE= {np.round(average_validation_errors[k], 2)}.")
 
 
 def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 500):
@@ -84,4 +104,9 @@ def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 50
 
 if __name__ == '__main__':
     np.random.seed(0)
+    # Q1-Q3:
     select_polynomial_degree()
+    # Q4:
+    select_polynomial_degree(noise=0)
+    # Q5:
+    select_polynomial_degree(n_samples=1500, noise=10)
