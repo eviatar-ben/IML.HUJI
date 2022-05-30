@@ -47,7 +47,7 @@ def select_polynomial_degree(n_samples: int = 100, noise: float = 5):
     fig.update_xaxes(title_text="x")
     fig.update_yaxes(title_text="y")
     fig.update_layout(title_text=rf"Generated a dataset of {n_samples} samples and noise={noise}")
-    # fig.show()
+    fig.show()
 
     # Question 2 - Perform CV for polynomial fitting with degrees 0,1,...,10
     average_training_and_validation_errors = [cross_validate(PolynomialFitting(k), X_train, y_train, mean_square_error)
@@ -93,13 +93,63 @@ def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 50
         Number of regularization parameter values to evaluate for each of the algorithms
     """
     # Question 6 - Load diabetes dataset and split into training and testing portions
-    raise NotImplementedError()
-
+    X, y = datasets.load_diabetes(return_X_y=True, as_frame=True)
+    X_train, y_train, X_test, y_test = split_train_test(X, y, n_samples / X.shape[0])
     # Question 7 - Perform CV for different values of the regularization parameter for Ridge and Lasso regressions
-    raise NotImplementedError()
+
+    # Ridge:
+
+    lam = np.linspace(0.02, 2.02, num=n_evaluations)
+
+    lasso_average_training_and_validation_errors = [
+        cross_validate(RidgeRegression(k), X_train.to_numpy(), y_train.to_numpy(), mean_square_error)
+        for k in lam]
+    ridge_training_errors = [tup[0] for tup in lasso_average_training_and_validation_errors]
+    ridge_validation_errors = [tup[1] for tup in lasso_average_training_and_validation_errors]
+
+    fig = go.Figure([go.Scatter(x=lam, y=ridge_training_errors, mode='lines+markers', name=r'Average Train Error'),
+                     go.Scatter(x=lam, y=ridge_validation_errors, mode='lines+markers',
+                                name=r'Average Validation Error')])
+    fig.update_xaxes(title_text="regularization parameter")
+    fig.update_yaxes(title_text="error values")
+    fig.update_layout(title_text=rf"Ridge regularization:")
+    fig.show()
+
+    # Lasso:
+    lasso_average_training_and_validation_errors = [
+        cross_validate(Lasso(k), X_train.to_numpy(), y_train.to_numpy(), mean_square_error)
+        for k in lam]
+    lasso_training_errors = [tup[0] for tup in lasso_average_training_and_validation_errors]
+    lasso_validation_errors = [tup[1] for tup in lasso_average_training_and_validation_errors]
+
+    fig = go.Figure([go.Scatter(x=lam, y=lasso_training_errors, mode='lines+markers', name=r'Average Train Error'),
+                     go.Scatter(x=lam, y=lasso_validation_errors, mode='lines+markers',
+                                name=r'Average Validation Error')])
+    fig.update_xaxes(title_text="regularization parameter")
+    fig.update_yaxes(title_text="error values")
+    fig.update_layout(title_text=rf"Lasso regularization:")
+    fig.show()
 
     # Question 8 - Compare best Ridge model, best Lasso model and Least Squares model
-    raise NotImplementedError()
+    lasso_best_lam = lam[np.argmin(lasso_validation_errors)]
+    ridge_best_lam = lam[np.argmin(ridge_validation_errors)]
+
+    linear_regression = LinearRegression()
+    ridge = RidgeRegression(ridge_best_lam)
+    lasso = Lasso(alpha=lasso_best_lam)
+    linear_regression.fit(X_train.to_numpy(), y_train.to_numpy())
+    ridge.fit(X_train.to_numpy(), y_train.to_numpy())
+    lasso.fit(X_train.to_numpy(), y_train.to_numpy())
+
+    print(f"{ridge_best_lam}"
+          f" as regularization parameter value achieved the best validation errors for the Ridge regularizations ")
+    print(f"{lasso_best_lam}"
+          f" as regularization parameter value achieved the best validation errors for the Lasso regularizations ")
+
+    print(f"Ridge fitted with best Lambda= {ridge_best_lam} emits error: {ridge.loss(X_test.to_numpy(), y_test.to_numpy())}")
+    lasso_error = mean_square_error(y_test.to_numpy(), lasso.predict(X_test.to_numpy()))
+    print(f"Lasso fitted with best Lambda= {ridge_best_lam} emits error: {lasso_error}")
+    print(f"Least Squares emits error: {linear_regression.loss(X_test.to_numpy(), y_test.to_numpy())}")
 
 
 if __name__ == '__main__':
@@ -110,3 +160,5 @@ if __name__ == '__main__':
     select_polynomial_degree(noise=0)
     # Q5:
     select_polynomial_degree(n_samples=1500, noise=10)
+    # Q6 - Q8:
+    select_regularization_parameter()
