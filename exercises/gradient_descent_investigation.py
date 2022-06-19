@@ -11,6 +11,9 @@ from IMLearn.utils import split_train_test
 import plotly.graph_objects as go
 import plotly
 import matplotlib.pyplot as plt
+from IMLearn.model_selection.cross_validate import cross_validate
+from IMLearn.metrics.loss_functions import misclassification_error
+from sklearn.metrics import roc_curve, auc
 
 
 def plot_descent_path(module: Type[BaseModule],
@@ -163,7 +166,6 @@ def compare_exponential_decay_rates(init: np.ndarray = np.array([np.sqrt(2), np.
     fig.show()
 
 
-
 def load_data(path: str = "../datasets/SAheart.data", train_portion: float = .8) -> \
         Tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
     """
@@ -197,19 +199,38 @@ def load_data(path: str = "../datasets/SAheart.data", train_portion: float = .8)
 
 
 def fit_logistic_regression():
+    from utils import custom
+
     # Load and split SA Heard Disease dataset
     X_train, y_train, X_test, y_test = load_data()
 
     # Plotting convergence rate of logistic regression over SA heart disease data
-    raise NotImplementedError()
-
+    logistic = LogisticRegression()
+    logistic.fit(X_train.to_numpy(), y_train.to_numpy())
+    fpr, tpr, thresholds = roc_curve(y_train, logistic.predict_proba(
+        np.concatenate((np.ones((X_train.shape[0], 1)), X_train), axis=1)))
+    c = [custom[0], custom[-1]]
+    fig = go.Figure(
+        data=[go.Scatter(x=[0, 1], y=[0, 1], mode="lines", line=dict(color="black", dash='dash'),
+                         name="Random Class Assignment"),
+              go.Scatter(x=fpr, y=tpr, mode='markers+lines', text=thresholds, name="", showlegend=False, marker_size=5,
+                         marker_color=c[1][1],
+                         hovertemplate="<b>Threshold:</b>%{text:.3f}<br>FPR: %{x:.3f}<br>TPR: %{y:.3f}")],
+        layout=go.Layout(title=rf"$\text{{ROC Curve Of Fitted Model - AUC}}={auc(fpr, tpr):.6f}$",
+                         xaxis=dict(title=r"$\text{False Positive Rate (FPR)}$"),
+                         yaxis=dict(title=r"$\text{True Positive Rate (TPR)}$")))
+    fig.show()
+    optimal_roc = np.argmax(tpr-fpr)
+    optimal_alpha = thresholds[optimal_roc]
+    print(f" optimal ROC is {optimal_roc} given with alpha= {optimal_alpha}")
+    logistic.alpha_ = optimal_alpha
+    print(f"Logistic regression yields test error= {logistic._loss(X_test.to_numpy(), y_test.to_numpy())}")
     # Fitting l1- and l2-regularized logistic regression models, using cross-validation to specify values
     # of regularization parameter
-    raise NotImplementedError()
 
 
 if __name__ == '__main__':
     np.random.seed(0)
     # compare_fixed_learning_rates()
     # compare_exponential_decay_rates()
-    # fit_logistic_regression()
+    fit_logistic_regression()
