@@ -225,9 +225,10 @@ def fit_logistic_regression():
     print(f" optimal ROC is {optimal_roc} given with alpha= {optimal_alpha}")
     logistic.alpha_ = optimal_alpha
     print(f"Logistic regression yields test error= {logistic._loss(X_test.to_numpy(), y_test.to_numpy())}")
+
     # Fitting l1- and l2-regularized logistic regression models, using cross-validation to specify values
     # of regularization parameter
-
+    logistic = LogisticRegression(penalty="l1")
 
 if __name__ == '__main__':
     np.random.seed(0)
