@@ -1,7 +1,7 @@
 import numpy as np
 from IMLearn import BaseModule
-
-
+#
+#
 class L2(BaseModule):
     """
     Class representing the L2 module
@@ -52,7 +52,6 @@ class L2(BaseModule):
         """
         # todo: shouldn't be transposed?: ϕ(x+h)−ϕ(x)=2xTh+hTh , hence Dϕ(x)=2xT
         return 2 * self.weights
-
 
 class L1(BaseModule):
     def __init__(self, weights: np.ndarray = None):
@@ -135,7 +134,8 @@ class LogisticModule(BaseModule):
             Value of function at point self.weights
         """
         # f(w) = - (1/m) sum_i^m[y*<x_i,w> - log(1+exp(<x_i,w>))]
-        return -np.mean(y * (X @ self.weights) - np.log(1 + np.exp(X @ self.weights)), axis=0)
+        xw = X @ self.weights
+        return -np.mean(y * xw - np.log(1 + np.exp(xw)), axis=0)
 
     def compute_jacobian(self, X: np.ndarray, y: np.ndarray, **kwargs) -> np.ndarray:
         """
@@ -154,7 +154,6 @@ class LogisticModule(BaseModule):
         output: ndarray of shape (n_features,)
             Derivative of function with respect to self.weights at point self.weights
         """
-        # return y * X.T - (self.weights * np.exp(X@self.weights)) / np.exp(X@self.weights) + 1
         return ((1 / (np.exp(-X @ self.weights) + 1)) - y).T @ X / len(X)
 
 
@@ -197,8 +196,7 @@ class RegularizedModule(BaseModule):
         self.include_intercept_ = include_intercept
 
         if weights is not None:
-            # self.weights(weights)
-            self._weights = weights
+            self.weights = weights
 
     def compute_output(self, **kwargs) -> np.ndarray:
         """
@@ -214,13 +212,9 @@ class RegularizedModule(BaseModule):
         output: ndarray of shape (1,)
             Value of function at point self.weights
         """
-        # if self.weights is not None:
-        self.fidelity_module_.weights = self.weights
-        if self.regularization_module_ is None:
-            return self.fidelity_module_.compute_output(X=kwargs["X"], y=kwargs["y"])
-        self.regularization_module_.weights = self.weights
-        return self.fidelity_module_.compute_output(X=kwargs["X"], y=kwargs["y"]) + \
-               self.lam_ * self.regularization_module_.compute_output(X=kwargs["X"], y=kwargs["y"])
+        fidelity = self.fidelity_module_.compute_output(**kwargs)
+        regularization = self.regularization_module_.compute_output(**kwargs)
+        return fidelity + self.lam_ * regularization
 
     def compute_jacobian(self, **kwargs) -> np.ndarray:
         """
@@ -236,12 +230,11 @@ class RegularizedModule(BaseModule):
         output: ndarray of shape (n_in,)
             Derivative with respect to self.weights at point self.weights
         """
-        self.fidelity_module_.weights = self.weights
-        if self.regularization_module_ is None:
-            return self.fidelity_module_.compute_jacobian(X=kwargs["X"], y=kwargs["y"])
-        self.regularization_module_.weights = self.weights
-        return self.fidelity_module_.compute_jacobian(X=kwargs["X"], y=kwargs["y"]) + \
-               self.lam_ * self.regularization_module_.compute_jacobian(X=kwargs["X"], y=kwargs["y"])
+        fidelity = self.fidelity_module_.compute_jacobian(**kwargs)
+        regularization = self.regularization_module_.compute_jacobian(**kwargs)
+        if self.include_intercept_:
+            regularization = np.insert(regularization, 0, 0)
+        return fidelity + self.lam_ * regularization
 
     @property
     def weights(self):
@@ -252,7 +245,7 @@ class RegularizedModule(BaseModule):
         -------
         weights: ndarray of shape (n_in, n_out)
         """
-        return self._weights
+        return self.fidelity_module_.weights
 
     @weights.setter
     def weights(self, weights: np.ndarray) -> None:
@@ -267,7 +260,8 @@ class RegularizedModule(BaseModule):
         weights: ndarray of shape (n_in, n_out)
             Weights to set for module
         """
-        # todo:   In case self.include_intercept_ is set to True, weights[0] is regarded as the intercept
+        self.fidelity_module_.weights = weights
         if self.include_intercept_:
-            pass
-        self._weights = weights
+            self.regularization_module_.weights = weights[1:]
+        else:
+            self.regularization_module_.weights = weights

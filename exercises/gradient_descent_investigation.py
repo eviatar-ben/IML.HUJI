@@ -94,7 +94,7 @@ def compare_fixed_learning_rates(init: np.ndarray = np.array([np.sqrt(2), np.e /
                                  etas: Tuple[float] = (1, .1, .01, .001)):
     def plot_trajectory(model):
         fig = plot_descent_path(model, np.array(callbacks[2]))
-        fig.update({'layout': {'title': f'L1 with rate= {rate}'}})
+        fig.update({'layout': {'title': f'{str(model).split(".")[-1][0:2]} with rate= {rate}'}})
         fig.show()
 
     def plot_convergence_rate(model):
@@ -106,7 +106,7 @@ def compare_fixed_learning_rates(init: np.ndarray = np.array([np.sqrt(2), np.e /
         plt.show()
         l1.weights = optimized_weights
         print(f"rates: {rate}")
-        print(f"Minimized L2: {l1.compute_output()}")
+        print(f"Minimized {model}: {l1.compute_output()}")
 
     for rate in etas:
         # L1:
@@ -153,6 +153,8 @@ def compare_exponential_decay_rates(init: np.ndarray = np.array([np.sqrt(2), np.
     # Plot descent path for gamma=0.95
     fig = plot_descent_path(L1, np.array(descent_path[0]))
     fig.show()
+    fig = plot_descent_path(L2, np.array(descent_path[0]))
+    fig.show()
 
 
 def load_data(path: str = "../datasets/SAheart.data", train_portion: float = .8) -> \
@@ -190,32 +192,38 @@ def load_data(path: str = "../datasets/SAheart.data", train_portion: float = .8)
 def fit_logistic_regression():
     from utils import custom
 
-    def cross_validation_regularized_logistic_regression():
-        logistic.alpha_ = 0.5
-        lams = np.linspace(0.02, 2.02, num=40)
+    def cross_validation_regularized_logistic_regression(penalty):
+        # lams = np.linspace(0.02, 2.02, num=40)
+        lams = [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1]
         train_scores, validation_scores = [], []
         for lam in lams:
-            logistic.lam_ = lam
-            train_score, validation_score = cross_validate(logistic, X_train.to_numpy(), y_train.to_numpy(),
+            module = LogisticRegression(penalty=penalty,
+                                        solver=GradientDescent(learning_rate=FixedLR(1e-4), max_iter=20000), lam=lam)
+            train_score, validation_score = cross_validate(module, X_train.to_numpy(), y_train.to_numpy(),
                                                            misclassification_error)
             train_scores.append(train_score)
             validation_scores.append(validation_score)
 
         min_error = np.argmin(validation_scores)
         chosen_lam = lams[min_error]
-        logistic.fit(X_train.to_numpy(), y_train.to_numpy())
-        print(f"{logistic.penalty_.upper()}-regularized logistic regression:")
+        module = LogisticRegression(include_intercept=True, penalty=penalty,
+                                    solver=GradientDescent(learning_rate=FixedLR(1e-4), max_iter=20000), lam=chosen_lam
+                                    ).fit(X_train.to_numpy(),
+                                          y_train.to_numpy())
+        print(f"{penalty.upper()}-regularized logistic regression:")
         print(f"The model's test error (trained over the whole train data) with the best lambda={chosen_lam} is:"
-              f" {logistic.loss(X_test.to_numpy(), y_test.to_numpy())}")
+              f" {module.loss(X_test.to_numpy(), y_test.to_numpy())}")
+
+        test_error = misclassification_error(y_test.to_numpy(), module.predict(X_test.to_numpy()))
+        print(f"{penalty} :: Test error={test_error}")
 
     # Load and split SA Heard Disease dataset
     X_train, y_train, X_test, y_test = load_data()
 
     # Plotting convergence rate of logistic regression over SA heart disease data
-    logistic = LogisticRegression()
+    logistic = LogisticRegression(solver=GradientDescent(learning_rate=FixedLR(1e-4), max_iter=20000))
     logistic.fit(X_train.to_numpy(), y_train.to_numpy())
-    fpr, tpr, thresholds = roc_curve(y_train, logistic.predict_proba(
-        np.concatenate((np.ones((X_train.shape[0], 1)), X_train), axis=1)))
+    fpr, tpr, thresholds = roc_curve(y_train, logistic.predict_proba(X_train.to_numpy()))
     c = [custom[0], custom[-1]]
     fig = go.Figure(
         data=[go.Scatter(x=[0, 1], y=[0, 1], mode="lines", line=dict(color="black", dash='dash'),
@@ -229,17 +237,14 @@ def fit_logistic_regression():
     fig.show()
     optimal_roc = np.argmax(tpr - fpr)
     optimal_alpha = thresholds[optimal_roc]
-    print(f" optimal ROC is {optimal_roc} given with alpha= {optimal_alpha}")
+    print(f"Optimal ROC is {optimal_roc} given with alpha= {optimal_alpha}")
     logistic.alpha_ = optimal_alpha
     print(f"Logistic regression yields test error= {logistic._loss(X_test.to_numpy(), y_test.to_numpy())}")
-
     # Fitting l1- and l2-regularized logistic regression models, using cross-validation to specify values
     # of regularization parameter
-    logistic = LogisticRegression(penalty="l1")
-    cross_validation_regularized_logistic_regression()
+    cross_validation_regularized_logistic_regression(penalty='l1')
 
-    logistic = LogisticRegression(penalty="l2")
-    cross_validation_regularized_logistic_regression()
+    cross_validation_regularized_logistic_regression(penalty='l2')
 
 
 if __name__ == '__main__':

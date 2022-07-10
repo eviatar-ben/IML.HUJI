@@ -95,12 +95,19 @@ class LogisticRegression(BaseEstimator):
         if self.penalty_ == "l2":
             regularization_module = L2()
         else:
-            regularization_module = None
-        fidelity = LogisticModule()
-        rg = RegularizedModule(fidelity_module=fidelity, regularization_module=regularization_module,
-                               lam=self.lam_, weights=np.random.randn(X.shape[1]),
-                               include_intercept=self.include_intercept_)
-        self.coefs_ = self.solver_.fit(f=rg, X=X, y=y)
+            cov = np.identity(X.shape[1]) / X.shape[1]
+            mean = np.zeros(X.shape[1])
+            init = np.random.multivariate_normal(mean, cov)
+            regularization_module = LogisticModule(init.copy())
+            self.coefs_ = self.solver_.fit(f=regularization_module, X=X, y=y)
+            return
+        cov = np.identity(X.shape[1]) / X.shape[1]
+        mean = np.zeros(X.shape[1])
+        fidelity = LogisticModule(np.random.multivariate_normal(mean, cov))
+        regularized_module = RegularizedModule(fidelity_module=fidelity, regularization_module=regularization_module,
+                                               lam=self.lam_, weights=fidelity.weights,
+                                               include_intercept=self.include_intercept_)
+        self.coefs_ = self.solver_.fit(f=regularized_module, X=X, y=y)
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -116,8 +123,7 @@ class LogisticRegression(BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        if self.include_intercept_:
-            X = np.concatenate((np.ones((X.shape[0], 1)), X), axis=1)
+        # todo double check include_intercept_
 
         return np.where(self.predict_proba(X) - self.alpha_ <= 0, 0, 1)
 
@@ -135,7 +141,10 @@ class LogisticRegression(BaseEstimator):
         probabilities: ndarray of shape (n_samples,)
             Probability of each sample being classified as `1` according to the fitted model
         """
-        # todo:
+        # todo double check include_intercept_
+        if self.include_intercept_:
+            X = np.concatenate((np.ones((X.shape[0], 1)), X), axis=1)
+
         return 1 / (1 + np.exp(-X @ self.coefs_))
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:

@@ -142,9 +142,6 @@ class GradientDescent:
             # callback
             self.callback_(weights=x_t_1, values=f.compute_output(X=X, y=y))
 
-            # Euclidean norm of w^(t)-w^(t-1) is more than the specified self.tol_:
-            # if np.sqrt((x_t_1 - x_t) @ (x_t_1 - x_t)) < self.tol_:
-            #     break
             if np.linalg.norm(x_t - x_t_1) < self.tol_:
                 break
             x_t = x_t_1
