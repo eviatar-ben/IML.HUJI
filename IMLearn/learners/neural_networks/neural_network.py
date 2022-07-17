@@ -23,14 +23,18 @@ class NeuralNetwork(BaseEstimator, BaseModule):
 
     pre_activations_:
     """
+
     def __init__(self,
                  modules: List[FullyConnectedLayer],
                  loss_fn: BaseModule,
                  solver: Union[StochasticGradientDescent, GradientDescent]):
         super().__init__()
-        raise NotImplementedError()
+        self.modules_ = modules
+        self.loss_fn_ = loss_fn
+        self.solver_ = solver
 
-    # region BaseEstimator implementations
+        # region BaseEstimator implementations
+
     def _fit(self, X: np.ndarray, y: np.ndarray) -> NoReturn:
         """
         Fit network over given input data using specified architecture and solver
@@ -43,7 +47,7 @@ class NeuralNetwork(BaseEstimator, BaseModule):
         y : ndarray of shape (n_samples, )
             Responses of input data to fit to
         """
-        raise NotImplementedError()
+        self.solver_.fit(self, X, y)
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -79,6 +83,7 @@ class NeuralNetwork(BaseEstimator, BaseModule):
             Performance under specified loss function
         """
         raise NotImplementedError()
+
     # endregion
 
     # region BaseModule implementations
@@ -172,6 +177,7 @@ class NeuralNetwork(BaseEstimator, BaseModule):
         non_flat_weights = NeuralNetwork._unflatten_parameters(weights, self.modules_)
         for module, weights in zip(self.modules_, non_flat_weights):
             module.weights = weights
+
     # endregion
 
     # region Internal methods

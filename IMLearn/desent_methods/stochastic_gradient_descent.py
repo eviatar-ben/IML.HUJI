@@ -58,7 +58,11 @@ class StochasticGradientDescent:
             Callable function receives as input any argument relevant for the current GD iteration. Arguments
             are specified in the `GradientDescent.fit` function
         """
-        raise NotImplementedError()
+        self.learning_rate_ = learning_rate
+        self.tol_ = tol
+        self.max_iter_ = max_iter
+        self.batch_size_ = batch_size
+        self.callback_ = callback
 
     def fit(self, f: BaseModule, X: np.ndarray, y: np.ndarray):
         """
@@ -138,4 +142,31 @@ class StochasticGradientDescent:
         eta: float
             learning rate used at current iteration
         """
-        raise NotImplementedError()
+        iteration = 1
+        x_t = f.weights
+        x_t_1 = x_t
+        average = x_t
+        best_y = f.compute_output(X=X, y=y)
+        best_x = x_t
+        # todo: maybe < and not <=
+        # todo: x_t is unnecessary- f.weights can be used instead.
+        while iteration <= self.max_iter_:
+            x_t_1 = x_t - self.learning_rate_.lr_step(t=iteration) * f.compute_jacobian(X=X, y=y)
+            f.weights = x_t_1
+
+            # average:
+            average += x_t_1.copy()
+            # best:
+            if f.compute_output(X=X, y=y) < best_y:
+                best_y = f.compute_output(X=X, y=y)
+                best_x = x_t_1
+
+            # callback
+            self.callback_(weights=x_t_1, values=f.compute_output(X=X, y=y))
+
+            if np.linalg.norm(x_t - x_t_1) < self.tol_:
+                break
+            x_t = x_t_1
+            iteration += 1
+
+        return x_t_1

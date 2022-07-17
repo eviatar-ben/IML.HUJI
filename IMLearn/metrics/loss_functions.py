@@ -78,7 +78,18 @@ def cross_entropy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     -------
     Cross entropy of given predictions
     """
-    raise NotImplementedError()
+    # Naively computes log(s_i) even when y_i = 0
+    # return -y.dot(np.log(s))
+
+    # samples = len(y_true)
+    #
+    # correct_log_probs = -np.log(y_pred[range(samples), y_true])
+    # data_loss = np.sum(correct_log_probs) / samples
+    #
+    # return data_loss
+
+    loss = -np.sum(y_true * np.log(y_pred))
+    return loss / float(y_pred.shape[0])
 
 
 def softmax(X: np.ndarray) -> np.ndarray:
@@ -94,4 +105,7 @@ def softmax(X: np.ndarray) -> np.ndarray:
     output: ndarray of shape (n_samples, n_features)
         Softmax(x) for every sample x in given data X
     """
-    raise NotImplementedError()
+    # todo: check if Softmax(x) for every sample x in given data X
+    exp_scores = np.exp(X)
+    probs = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
+    return probs
